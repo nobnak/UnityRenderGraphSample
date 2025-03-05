@@ -48,12 +48,21 @@ public class DrawMeshInstancedProcedural : MonoBehaviour {
 
     #region drawing
     void Draw(ScriptableRenderContext context, Camera camera) {
-        var cameraData = camera.GetComponent<UniversalAdditionalCameraData>();
-        if (cameraData == null) {
-            return;
+        var cameraData = camera.GetUniversalAdditionalCameraData();
+        ScriptableRenderer renderer;
+        if (cameraData != null) {
+            renderer = cameraData.scriptableRenderer;
+        } else {
+            var renderPipeline = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
+            if (renderPipeline == null) {
+                Debug.LogWarning("Render pipeline is not URP", camera);
+                return;
+            }
+            renderer = renderPipeline.GetRenderer(0);
         }
-        var renderer = cameraData.scriptableRenderer;
+
         if (renderer == null || dep.mesh == null) {
+            Debug.LogWarning("Renderer or mesh is null", camera);
             return;
         }
 
